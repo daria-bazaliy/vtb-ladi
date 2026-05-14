@@ -1,0 +1,258 @@
+
+<h2 class="sr-only">Интерактивный дашборд LADI — анализ зон для размещения банкоматов ВТБ</h2>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.dash { padding: 1.5rem 0; }
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-dot { width: 8px; height: 8px; border-radius: 50%; background: #0066CC; }
+.brand-name { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); letter-spacing: 0.05em; text-transform: uppercase; }
+.title { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.subtitle { font-size: 14px; color: var(--color-text-secondary); margin-top: 2px; }
+
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+.metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 0.875rem 1rem; }
+.metric-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.metric-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.metric-value.blue { color: #0066CC; }
+.metric-value.green { color: #1D9E75; }
+.metric-value.amber { color: #BA7517; }
+.metric-value.red { color: #A32D2D; }
+
+.section { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+.card-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+.slider-label { font-size: 13px; color: var(--color-text-secondary); min-width: 90px; }
+.slider-val { font-size: 13px; font-weight: 500; color: var(--color-text-primary); min-width: 32px; text-align: right; }
+input[type=range] { flex: 1; }
+
+.zone-list { display: flex; flex-direction: column; gap: 6px; }
+.zone-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); cursor: pointer; transition: background 0.15s; }
+.zone-item:hover { background: var(--color-background-secondary); }
+.zone-item.selected { border-color: #0066CC; background: #E6F1FB; }
+.zone-rank { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); min-width: 18px; }
+.zone-name { font-size: 13px; color: var(--color-text-primary); flex: 1; }
+.zone-ladi { font-size: 13px; font-weight: 500; }
+.zone-bar-wrap { width: 60px; height: 4px; background: var(--color-border-tertiary); border-radius: 2px; }
+.zone-bar { height: 4px; border-radius: 2px; background: #0066CC; }
+
+.detail { display: flex; flex-direction: column; gap: 10px; }
+.detail-stat { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.detail-stat:last-child { border-bottom: none; }
+.detail-key { font-size: 13px; color: var(--color-text-secondary); }
+.detail-val { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+
+.ladi-dial { display: flex; flex-direction: column; align-items: center; margin-bottom: 1rem; }
+.ladi-num { font-size: 42px; font-weight: 500; color: #0066CC; line-height: 1; }
+.ladi-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; }
+
+.badge { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: var(--border-radius-md); font-weight: 500; }
+.badge.high { background: #FCEBEB; color: #A32D2D; }
+.badge.med { background: #FAEEDA; color: #854F0B; }
+.badge.low { background: #EAF3DE; color: #3B6D11; }
+
+.formula { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.8; margin-top: 0.75rem; }
+.formula span { font-weight: 500; color: var(--color-text-primary); }
+
+.bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mcc-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.mcc-code { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); min-width: 44px; }
+.mcc-bar-wrap { flex: 1; height: 6px; background: var(--color-border-tertiary); border-radius: 3px; }
+.mcc-bar { height: 6px; border-radius: 3px; }
+.mcc-pct { font-size: 12px; color: var(--color-text-secondary); min-width: 36px; text-align: right; }
+
+.time-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.time-label { font-size: 12px; color: var(--color-text-secondary); min-width: 70px; }
+.time-bar-wrap { flex: 1; height: 6px; background: var(--color-border-tertiary); border-radius: 3px; }
+.time-bar { height: 6px; border-radius: 3px; background: #1D9E75; }
+.time-pct { font-size: 12px; color: var(--color-text-secondary); min-width: 36px; text-align: right; }
+
+@media (max-width: 580px) {
+  .section { grid-template-columns: 1fr; }
+  .bottom { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="dash">
+  <div class="header">
+    <div>
+      <div class="brand"><div class="brand-dot"></div><span class="brand-name">ВТБ · Geo Intelligence</span></div>
+      <div class="title">LADI Dashboard</div>
+      <div class="subtitle">Latent ATM Demand Index — анализ 1 567 зон</div>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Зон проанализировано</div><div class="metric-value blue">1 567</div></div>
+    <div class="metric"><div class="metric-label">Displaced-клиентов</div><div class="metric-value amber">2 827</div></div>
+    <div class="metric"><div class="metric-label">Доля displaced</div><div class="metric-value red">7.6%</div></div>
+    <div class="metric"><div class="metric-label">Объём транзакций</div><div class="metric-value green">262M ₽</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom: 12px;">
+    <div class="card-title">Настройка весов LADI</div>
+    <div id="sliders">
+      <div class="slider-row"><span class="slider-label">Displaced</span><input type="range" id="w0" min="0" max="100" value="35" step="5"><span class="slider-val" id="v0">35%</span></div>
+      <div class="slider-row"><span class="slider-label">Объём</span><input type="range" id="w1" min="0" max="100" value="25" step="5"><span class="slider-val" id="v1">25%</span></div>
+      <div class="slider-row"><span class="slider-label">Клиенты</span><input type="range" id="w2" min="0" max="100" value="20" step="5"><span class="slider-val" id="v2">20%</span></div>
+      <div class="slider-row"><span class="slider-label">MCC</span><input type="range" id="w3" min="0" max="100" value="10" step="5"><span class="slider-val" id="v3">10%</span></div>
+      <div class="slider-row"><span class="slider-label">Чек</span><input type="range" id="w4" min="0" max="100" value="10" step="5"><span class="slider-val" id="v4">10%</span></div>
+    </div>
+    <div class="formula">
+      LADI = <span id="f0">0.35</span> × Displaced + <span id="f1">0.25</span> × Объём + <span id="f2">0.20</span> × Клиенты + <span id="f3">0.10</span> × MCC + <span id="f4">0.10</span> × Чек
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="card">
+      <div class="card-title">Шорт-лист зон</div>
+      <div class="zone-list" id="zone-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Детали зоны</div>
+      <div id="detail-panel"></div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="card">
+      <div class="card-title">MCC-профиль топ зон</div>
+      <div id="mcc-panel"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Временной профиль</div>
+      <div id="time-panel"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const RAW = [
+  { id:"8911aa7abd3ffff", addr:"ул. Садовая, р-н Центральный", displaced:100, vol:4600000, clients:790, mcc:22, avgChk:1850, cluster:"Деловые центры" },
+  { id:"8911aa7a967ffff", addr:"пр. Ленина, р-н Северный",    displaced:50,  vol:1200000, clients:492, mcc:11, avgChk:980,  cluster:"Жилые зоны" },
+  { id:"8911aa6360bffff", addr:"ул. Мира, р-н Западный",       displaced:31,  vol:1100000, clients:430, mcc:11, avgChk:920,  cluster:"Жилые зоны" },
+  { id:"8911aa7a117ffff", addr:"пр. Победы, р-н Восточный",    displaced:30,  vol:9600000, clients:896, mcc:10, avgChk:1120, cluster:"Деловые центры" },
+  { id:"8911aa7330fffff", addr:"ул. Строителей, р-н Южный",    displaced:22,  vol:800000,  clients:310, mcc:8,  avgChk:760,  cluster:"Транзитные зоны" },
+];
+
+function norm(arr, key) {
+  const mn = Math.min(...arr.map(x=>x[key]));
+  const mx = Math.max(...arr.map(x=>x[key]));
+  return arr.map(x => mx===mn ? 0 : (x[key]-mn)/(mx-mn));
+}
+
+const dN  = norm(RAW, 'displaced');
+const vN  = norm(RAW, 'vol');
+const cN  = norm(RAW, 'clients');
+const mN  = norm(RAW, 'mcc');
+const aN  = norm(RAW, 'avgChk');
+
+let selectedIdx = 0;
+
+function getWeights() {
+  const vals = [0,1,2,3,4].map(i => parseInt(document.getElementById('w'+i).value));
+  const total = vals.reduce((a,b)=>a+b,0) || 1;
+  return vals.map(v => v/total);
+}
+
+function calcLADI(weights) {
+  return RAW.map((z,i) => ({
+    ...z,
+    ladi: Math.round((weights[0]*dN[i] + weights[1]*vN[i] + weights[2]*cN[i] + weights[3]*mN[i] + weights[4]*aN[i])*100)
+  })).sort((a,b) => b.ladi - a.ladi);
+}
+
+function badge(ladi) {
+  if (ladi >= 70) return '<span class="badge high">Критичный</span>';
+  if (ladi >= 40) return '<span class="badge med">Высокий</span>';
+  return '<span class="badge low">Средний</span>';
+}
+
+function ladiColor(ladi) {
+  if (ladi >= 70) return '#A32D2D';
+  if (ladi >= 40) return '#BA7517';
+  return '#3B6D11';
+}
+
+function renderZones(zones) {
+  const list = document.getElementById('zone-list');
+  list.innerHTML = zones.map((z,i) => `
+    <div class="zone-item${i===selectedIdx?' selected':''}" onclick="selectZone(${i})">
+      <span class="zone-rank">#${i+1}</span>
+      <span class="zone-name">${z.addr}</span>
+      <div class="zone-bar-wrap"><div class="zone-bar" style="width:${z.ladi}%;background:${ladiColor(z.ladi)}"></div></div>
+      <span class="zone-ladi" style="color:${ladiColor(z.ladi)}">${z.ladi}</span>
+    </div>
+  `).join('');
+}
+
+function renderDetail(z) {
+  document.getElementById('detail-panel').innerHTML = `
+    <div class="ladi-dial">
+      <div class="ladi-num" style="color:${ladiColor(z.ladi)}">${z.ladi}</div>
+      <div class="ladi-sub">LADI / 100 &nbsp; ${badge(z.ladi)}</div>
+    </div>
+    <div class="detail">
+      <div class="detail-stat"><span class="detail-key">Адрес</span><span class="detail-val" style="font-size:12px;max-width:160px;text-align:right">${z.addr}</span></div>
+      <div class="detail-stat"><span class="detail-key">Displaced-клиентов</span><span class="detail-val">${z.displaced}</span></div>
+      <div class="detail-stat"><span class="detail-key">Объём транзакций</span><span class="detail-val">${(z.vol/1e6).toFixed(1)}M ₽</span></div>
+      <div class="detail-stat"><span class="detail-key">Клиентов в зоне</span><span class="detail-val">${z.clients}</span></div>
+      <div class="detail-stat"><span class="detail-key">Топ MCC-код</span><span class="detail-val">MCC ${z.mcc}</span></div>
+      <div class="detail-stat"><span class="detail-key">Кластер</span><span class="detail-val">${z.cluster}</span></div>
+    </div>
+  `;
+}
+
+function renderMCC() {
+  const mccs = [{code:8,pct:53.6,color:'#0066CC'},{code:13,pct:12.1,color:'#1D9E75'},{code:9,pct:9.8,color:'#BA7517'},{code:11,pct:7.3,color:'#A32D2D'},{code:10,pct:5.8,color:'#534AB7'}];
+  document.getElementById('mcc-panel').innerHTML = mccs.map(m=>`
+    <div class="mcc-row">
+      <span class="mcc-code">MCC ${m.code}</span>
+      <div class="mcc-bar-wrap"><div class="mcc-bar" style="width:${m.pct}%;background:${m.color}"></div></div>
+      <span class="mcc-pct">${m.pct}%</span>
+    </div>
+  `).join('');
+}
+
+function renderTime() {
+  const times = [{label:'Бакет 0',pct:2.1},{label:'Бакет 1',pct:21.7},{label:'Бакет 2',pct:39.2},{label:'Бакет 3',pct:36.9}];
+  document.getElementById('time-panel').innerHTML = times.map(t=>`
+    <div class="time-row">
+      <span class="time-label">${t.label}</span>
+      <div class="time-bar-wrap"><div class="time-bar" style="width:${t.pct}%"></div></div>
+      <span class="time-pct">${t.pct}%</span>
+    </div>
+  `).join('');
+}
+
+window.selectZone = function(i) {
+  selectedIdx = i;
+  const w = getWeights();
+  const zones = calcLADI(w);
+  renderZones(zones);
+  renderDetail(zones[selectedIdx]);
+};
+
+function update() {
+  const w = getWeights();
+  const total = [0,1,2,3,4].map(i=>parseInt(document.getElementById('w'+i).value)).reduce((a,b)=>a+b,0)||1;
+  [0,1,2,3,4].forEach(i => {
+    const raw = parseInt(document.getElementById('w'+i).value);
+    document.getElementById('v'+i).textContent = Math.round(raw/total*100)+'%';
+    document.getElementById('f'+i).textContent = (raw/total).toFixed(2);
+  });
+  const zones = calcLADI(w);
+  renderZones(zones);
+  renderDetail(zones[selectedIdx]);
+}
+
+[0,1,2,3,4].forEach(i => document.getElementById('w'+i).addEventListener('input', update));
+
+renderMCC();
+renderTime();
+update();
+</script>
