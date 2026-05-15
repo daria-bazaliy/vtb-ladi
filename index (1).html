@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LADI Dashboard · ВТБ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0A0E1A;color:#fff;min-height:100vh;padding:1.5rem}
+.brand{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.dot{width:8px;height:8px;border-radius:50%;background:#00C2FF}
+.brand-name{font-size:11px;font-weight:600;color:#00C2FF;letter-spacing:.1em;text-transform:uppercase}
+.title{font-size:26px;font-weight:700;color:#fff;margin-bottom:2px}
+.subtitle{font-size:13px;color:#A8B8D0;margin-bottom:1.5rem}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
+.metric{background:#141E35;border:1px solid #1E2D4A;border-radius:12px;padding:.875rem 1rem}
+.metric-label{font-size:11px;color:#A8B8D0;margin-bottom:4px}
+.metric-value{font-size:24px;font-weight:700}
+.blue{color:#00C2FF}.green{color:#00E5A0}.amber{color:#F5A623}.red{color:#FF4D6D}
+.weights-card{background:#141E35;border:1px solid #1E2D4A;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:11px;font-weight:600;color:#A8B8D0;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.875rem}
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:.75rem}
+.slider-label{font-size:13px;color:#A8B8D0;min-width:130px}
+.slider-val{font-size:13px;font-weight:600;color:#fff;min-width:36px;text-align:right}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:#1E2D4A;border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#00C2FF;cursor:pointer}
+.formula{background:#0F1628;border-radius:8px;padding:10px 14px;font-size:12px;color:#A8B8D0;line-height:2;margin-top:.75rem}
+.formula span{font-weight:700;color:#00C2FF}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.card{background:#141E35;border:1px solid #1E2D4A;border-radius:12px;padding:1.25rem}
+.zone-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;border:1px solid #1E2D4A;cursor:pointer;margin-bottom:6px;transition:all .15s}
+.zone-item:hover{background:#1E2D4A}
+.zone-item.selected{border-color:#00C2FF;background:rgba(0,194,255,.08)}
+.zone-rank{font-size:11px;color:#A8B8D0;min-width:20px;font-weight:600}
+.zone-name{font-size:12px;color:#fff;flex:1;line-height:1.3}
+.zone-bar-wrap{width:50px;height:4px;background:#1E2D4A;border-radius:2px}
+.zone-bar{height:4px;border-radius:2px}
+.zone-ladi{font-size:13px;font-weight:700;min-width:28px;text-align:right}
+.ladi-big{text-align:center;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #1E2D4A}
+.ladi-num{font-size:48px;font-weight:700;line-height:1}
+.ladi-sub{font-size:11px;color:#A8B8D0;margin-top:4px}
+.badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;margin-top:6px}
+.badge.high{background:rgba(255,77,109,.15);color:#FF4D6D}
+.badge.med{background:rgba(245,166,35,.15);color:#F5A623}
+.badge.low{background:rgba(0,229,160,.15);color:#00E5A0}
+.detail-stat{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1E2D4A}
+.detail-stat:last-child{border-bottom:none}
+.detail-key{font-size:12px;color:#A8B8D0}
+.detail-val{font-size:12px;font-weight:600;color:#fff;text-align:right;max-width:150px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bar-label{font-size:12px;color:#A8B8D0;min-width:75px}
+.bar-wrap{flex:1;height:6px;background:#1E2D4A;border-radius:3px}
+.bar-fill{height:6px;border-radius:3px}
+.bar-pct{font-size:12px;color:#A8B8D0;min-width:36px;text-align:right}
+.insight{background:#0F1E10;border:1px solid #1A3A1A;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;color:#00E5A0;line-height:1.6}
+.warning{background:#1E0F0F;border:1px solid #3A1A1A;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;color:#FF4D6D;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="brand"><div class="dot"></div><span class="brand-name">ВТБ · Geo Intelligence</span></div>
+<div class="title">LADI Dashboard</div>
+<div class="subtitle">Latent ATM Demand Index · 1 567 зон · Москва</div>
+
+<div class="metrics">
+  <div class="metric"><div class="metric-label">Зон проанализировано</div><div class="metric-value blue">1 567</div></div>
+  <div class="metric"><div class="metric-label">Displaced-клиентов</div><div class="metric-value amber">2 827</div></div>
+  <div class="metric"><div class="metric-label">Доля от ATM-клиентов</div><div class="metric-value red">7.6%</div></div>
+  <div class="metric"><div class="metric-label">Объём транзакций</div><div class="metric-value green">262M ₽</div></div>
+</div>
+
+<div class="weights-card">
+  <div class="card-title">Настройка весов LADI — двигайте слайдеры</div>
+  <div class="slider-row"><span class="slider-label">Displaced-клиенты</span><input type="range" id="w0" min="0" max="100" value="35" step="5"><span class="slider-val" id="v0">35%</span></div>
+  <div class="slider-row"><span class="slider-label">Объём транзакций</span><input type="range" id="w1" min="0" max="100" value="25" step="5"><span class="slider-val" id="v1">25%</span></div>
+  <div class="slider-row"><span class="slider-label">Клиентов в зоне</span><input type="range" id="w2" min="0" max="100" value="20" step="5"><span class="slider-val" id="v2">20%</span></div>
+  <div class="slider-row"><span class="slider-label">Разнообразие катег.</span><input type="range" id="w3" min="0" max="100" value="10" step="5"><span class="slider-val" id="v3">10%</span></div>
+  <div class="slider-row"><span class="slider-label">Средний чек</span><input type="range" id="w4" min="0" max="100" value="10" step="5"><span class="slider-val" id="v4">10%</span></div>
+  <div class="formula">LADI = <span id="f0">0.35</span> × Displaced + <span id="f1">0.25</span> × Объём + <span id="f2">0.20</span> × Клиенты + <span id="f3">0.10</span> × Категории + <span id="f4">0.10</span> × Чек</div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <div class="card-title">Шорт-лист зон</div>
+    <div id="zone-list"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Детали зоны</div>
+    <div id="detail-panel"></div>
+  </div>
+</div>
+
+<div class="grid3" style="margin-top:10px">
+  <div class="card">
+    <div class="card-title">MCC-профиль топ зон</div>
+    <div id="mcc-panel"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Временной профиль</div>
+    <div id="time-panel"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Кластеры зон</div>
+    <div id="cluster-panel"></div>
+  </div>
+</div>
+
+<script>
+const RAW=[
+  {id:"8911aa7abd3ffff",addr:"Four Seasons / Охотный Ряд",displaced:100,vol:4610259,clients:790,mcc:22,avgChk:1850,cluster:"Деловые центры"},
+  {id:"8911aa7a117ffff",addr:"Москва-Сити, Пресненский р-н",displaced:30,vol:9603783,clients:896,mcc:10,avgChk:1120,cluster:"Деловые центры"},
+  {id:"8911aa6365bffff",addr:"РЖД / Новая Басманная",displaced:8,vol:10567411,clients:542,mcc:5,avgChk:960,cluster:"Деловые центры"},
+  {id:"8911aa7a967ffff",addr:"Альфа-Банк, Мещанский р-н",displaced:50,vol:1208758,clients:492,mcc:11,avgChk:980,cluster:"Активные зоны"},
+  {id:"8911aa6360bffff",addr:"Комсомольская пл, три вокзала",displaced:31,vol:1109286,clients:430,mcc:11,avgChk:920,cluster:"Активные зоны"},
+  {id:"8911aa7aec7ffff",addr:"Киевский вокзал, Дорогомилово",displaced:18,vol:1228322,clients:327,mcc:8,avgChk:760,cluster:"Активные зоны"},
+  {id:"8911aa7330fffff",addr:"Adidas / р-н Щукино",displaced:22,vol:806465,clients:294,mcc:8,avgChk:760,cluster:"Активные зоны"},
+  {id:"8911aa7222bffff",addr:"Химкинский бул, Сев. Тушино",displaced:17,vol:1104205,clients:233,mcc:9,avgChk:850,cluster:"Малоактивные зоны"},
+  {id:"8911aa7b313ffff",addr:"Ак. Полякова, Черёмушки",displaced:13,vol:890435,clients:255,mcc:12,avgChk:920,cluster:"Малоактивные зоны"},
+  {id:"8911aa78127ffff",addr:"Зацепский Вал, Замоскворечье",displaced:15,vol:1190100,clients:306,mcc:13,avgChk:880,cluster:"Малоактивные зоны"},
+];
+
+function norm(arr,key){const mn=Math.min(...arr.map(x=>x[key])),mx=Math.max(...arr.map(x=>x[key]));return arr.map(x=>mx===mn?0:(x[key]-mn)/(mx-mn));}
+const dN=norm(RAW,'displaced'),vN=norm(RAW,'vol'),cN=norm(RAW,'clients'),mN=norm(RAW,'mcc'),aN=norm(RAW,'avgChk');
+let sel=0;
+function weights(){const v=[0,1,2,3,4].map(i=>parseInt(document.getElementById('w'+i).value)),t=v.reduce((a,b)=>a+b,0)||1;return v.map(x=>x/t);}
+function calcLADI(w){return RAW.map((z,i)=>({...z,ladi:Math.round((w[0]*dN[i]+w[1]*vN[i]+w[2]*cN[i]+w[3]*mN[i]+w[4]*aN[i])*100)})).sort((a,b)=>b.ladi-a.ladi);}
+function color(l){return l>=60?'#FF4D6D':l>=35?'#F5A623':'#00E5A0';}
+function badge(l){const cls=l>=60?'high':l>=35?'med':'low',txt=l>=60?'Критичный':l>=35?'Высокий':'Средний';return'<span class="badge '+cls+'">'+txt+'</span>';}
+
+function renderZones(zones){
+  document.getElementById('zone-list').innerHTML=zones.map((z,i)=>
+    '<div class="zone-item'+(i===sel?' selected':'')+'" onclick="selectZone('+i+')">'+
+    '<span class="zone-rank">#'+(i+1)+'</span>'+
+    '<span class="zone-name">'+z.addr+'</span>'+
+    '<div class="zone-bar-wrap"><div class="zone-bar" style="width:'+z.ladi+'%;background:'+color(z.ladi)+'"></div></div>'+
+    '<span class="zone-ladi" style="color:'+color(z.ladi)+'">'+z.ladi+'</span></div>').join('');
+}
+
+function renderDetail(z){
+  let extra='';
+  if(z.addr.includes('Альфа'))extra='<div class="warning">Банкомат конкурента рядом — клиенты ВТБ вынуждены им пользоваться</div>';
+  if(z.addr.includes('вокзал')||z.addr.includes('Вокзал'))extra='<div class="insight">Транспортный узел — высокий трафик приезжих</div>';
+  if(z.addr.includes('вокзала'))extra='<div class="insight">Три вокзала рядом — максимальный пешеходный трафик</div>';
+  document.getElementById('detail-panel').innerHTML=
+    '<div class="ladi-big"><div class="ladi-num" style="color:'+color(z.ladi)+'">'+z.ladi+'</div>'+
+    '<div class="ladi-sub">LADI / 100</div>'+badge(z.ladi)+'</div>'+
+    '<div class="detail-stat"><span class="detail-key">Адрес</span><span class="detail-val">'+z.addr+'</span></div>'+
+    '<div class="detail-stat"><span class="detail-key">Displaced-клиентов</span><span class="detail-val">'+z.displaced+'</span></div>'+
+    '<div class="detail-stat"><span class="detail-key">Объём транзакций</span><span class="detail-val">'+(z.vol/1e6).toFixed(1)+'M ₽</span></div>'+
+    '<div class="detail-stat"><span class="detail-key">Клиентов в зоне</span><span class="detail-val">'+z.clients+'</span></div>'+
+    '<div class="detail-stat"><span class="detail-key">Топ MCC-код</span><span class="detail-val">MCC '+z.mcc+'</span></div>'+
+    '<div class="detail-stat"><span class="detail-key">Кластер</span><span class="detail-val">'+z.cluster+'</span></div>'+extra;
+}
+
+function renderMCC(){
+  const d=[{c:8,p:53.6,col:'#00C2FF'},{c:13,p:12.1,col:'#00E5A0'},{c:9,p:9.8,col:'#F5A623'},{c:11,p:7.3,col:'#FF4D6D'},{c:10,p:5.8,col:'#C084FC'}];
+  document.getElementById('mcc-panel').innerHTML=d.map(m=>
+    '<div class="bar-row"><span class="bar-label">MCC '+m.c+'</span><div class="bar-wrap"><div class="bar-fill" style="width:'+m.p+'%;background:'+m.col+'"></div></div><span class="bar-pct">'+m.p+'%</span></div>').join('');
+}
+
+function renderTime(){
+  const d=[{l:'Бакет 0',p:2.1},{l:'Бакет 1',p:21.7},{l:'Бакет 2',p:39.2},{l:'Бакет 3',p:36.9}];
+  document.getElementById('time-panel').innerHTML=d.map(t=>
+    '<div class="bar-row"><span class="bar-label">'+t.l+'</span><div class="bar-wrap"><div class="bar-fill" style="width:'+t.p+'%;background:#00E5A0"></div></div><span class="bar-pct">'+t.p+'%</span></div>').join('');
+}
+
+function renderClusters(){
+  const d=[{n:'Деловые центры',z:3,col:'#FF4D6D'},{n:'Активные зоны',z:943,col:'#F5A623'},{n:'Малоактивные',z:620,col:'#00E5A0'},{n:'Аномалия',z:1,col:'#C084FC'}];
+  document.getElementById('cluster-panel').innerHTML=d.map(c=>
+    '<div class="bar-row"><span class="bar-label" style="min-width:120px;font-size:11px">'+c.n+'</span><div class="bar-wrap"><div class="bar-fill" style="width:'+Math.round(c.z/1567*100)+'%;background:'+c.col+'"></div></div><span class="bar-pct">'+c.z+'</span></div>').join('');
+}
+
+window.selectZone=function(i){sel=i;const w=weights(),zones=calcLADI(w);renderZones(zones);renderDetail(zones[sel]);};
+
+function update(){
+  const raw=[0,1,2,3,4].map(i=>parseInt(document.getElementById('w'+i).value)),total=raw.reduce((a,b)=>a+b,0)||1;
+  [0,1,2,3,4].forEach(i=>{document.getElementById('v'+i).textContent=Math.round(raw[i]/total*100)+'%';document.getElementById('f'+i).textContent=(raw[i]/total).toFixed(2);});
+  const zones=calcLADI(weights());renderZones(zones);renderDetail(zones[sel]);
+}
+
+[0,1,2,3,4].forEach(i=>document.getElementById('w'+i).addEventListener('input',update));
+renderMCC();renderTime();renderClusters();update();
+</script>
+</body>
+</html>
